@@ -1,6 +1,5 @@
-close all;
-clear all
-clc;
+function [FreqDistance,LadderCompatible] = process(fileName);
+
 tic
 %Loading precalc gaussians and predefined args
 args = load('preCalcArgs');
@@ -15,7 +14,7 @@ numOfPicks=7;
 SpectroAmplitudeLuminConversion = false;
 
 %Reading the image
-Im = imread('sample2.jpg');
+Im = imread(fileName);
 normalizedIm = floor(Im/calcGroupSize)+1;
 %Im = AllColorTests()
 imshow(Im); %Show the given Image

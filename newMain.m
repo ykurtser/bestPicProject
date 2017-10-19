@@ -16,7 +16,7 @@ for i = 1:size(parsed{1},1)
    photosMap(parsed{2}{i}) = currStruct;
 end
 for i = 1:size(imageNames)
-%    [currFreqDistance,currLatterCompatible] = process(imageNames(i).name);
+%    [currFreqDistance,currLadderCompatible] = process(imageNames(i).name);
     bracketLocation=strfind(imageNames(i).name,'-'); %all file names are Id-something.jpeg
     currPhotoId = imageNames(i).name(1:bracketLocation-1);
     if(~photosMap.iskey(currPhotoId)) 
