@@ -10,7 +10,7 @@ calcGroupSize = args.calcGroupSize;
 
 %CONSTS
 HueToWLRotationValue = 14;
-numOfPicks=6;
+numOfPicks=7;
 %Configuration Variables
 SpectroAmplitudeLuminConversion = false;
 
@@ -18,7 +18,7 @@ SpectroAmplitudeLuminConversion = false;
 Im = imread('sample2.jpg');
 normalizedIm = floor(Im/calcGroupSize)+1;
 %Im = AllColorTests()
-%imshow(Im); %Show the given Image
+imshow(Im); %Show the given Image
 Spectogram = zeros(1,resulution);
 %HsvIm = rgb2hsv(Im); %Image in HSV
 
@@ -48,6 +48,7 @@ xlabel('wavlength[nm]');
 ylabel('weight[au]');
 %%
 [IndicesOfMaxValuesInSpectogram,MaxPicksValues] = GetPickLambdaFromSpectogram(numOfPicks,Spectogram);
+numOfPicks = min(size(IndicesOfMaxValuesInSpectogram,2),7);
 WLOfGivenMaxIndices = x_val(IndicesOfMaxValuesInSpectogram);
 TheroticalOctaveMat  = buildOctaves( WLOfGivenMaxIndices );
 [closestInterval, MinErr] = findClosestInterval(TheroticalOctaveMat,WLOfGivenMaxIndices );
