@@ -52,8 +52,8 @@ WLOfGivenMaxIndices = x_val(IndicesOfMaxValuesInSpectogram);
 TheroticalOctaveMat  = buildOctaves( WLOfGivenMaxIndices );
 [closestInterval, MinErr] = findClosestInterval(TheroticalOctaveMat,WLOfGivenMaxIndices );
 %%
- ErrorInEachRow=sum(MinErr');
- [octMinErr,baseFreqIndex]=min(ErrorInEachRow)
+ ErrorInEachRowMajor=sum(MinErr');
+ [octMinErr,baseFreqIndex]=min(ErrorInEachRowMajor)
 
 %tempMat = circshift(closestInterval,[0 -baseFreqIndex])
 
@@ -85,9 +85,42 @@ xlabel('wavlength[nm]');
 ylabel('weight[au]');
 
 figure;
-plot(1:numOfPicks,ErrorInEachRow);
+plot(1:numOfPicks,ErrorInEachRowMajor);
 title('sum of absolute error');
 xlabel('base frequency[THz]');
 ylabel('error');
 toc
+%% match to ladders
+% in a ladder, 1 is half a tone and 2 is a tone
+major=[2,2,1,2,2,2,1]
+minor=[2,1,2,2,1,2,2]
+referenceOctave=TheroticalOctaveMat(baseFreqIndex,:);
+[  StartNoteMajor,clostestNotesMajor,ErrorInEachRowMajor,BestLadderMajor,SignedMinErrMajor ] = CalcDistanceFromLadder( MaxPicksValues,referenceOctave,major )
+[  StartNoteMinor,clostestNotesMinor,ErrorInEachRowMinor,BestLadderMinor,SignedMinErrMinor ] = CalcDistanceFromLadder( MaxPicksValues,referenceOctave,minor )
+plotBestMajorLadderWL=zeros(256,1);
+IdealLadderInHue=WaveLength2Hue((fliplr((BestLadderMajor/100).^-1)),resulution);
+plotBestMajorLadderWL(resulution-IdealLadderInHue)=min(MaxPicksValues);
+
+
+figure;
+plot(x_val,Spectogram);
+hold on;
+
+stem(x_val,plotIdealOctave,'green');
+stem(x_val,plotBestMajorLadderWL,'red');
+title('Best major Ladder');
+xlabel('wavlength[nm]');
+
+plotBestMinorLadderWL=zeros(256,1);
+IdealLadderInHue=WaveLength2Hue((fliplr((BestLadderMinor/100).^-1)),resulution);
+plotBestMinorLadderWL(resulution-IdealLadderInHue)=min(MaxPicksValues);
+
+ figure;
+ plot(x_val,Spectogram);
+hold on;
+
+stem(x_val,plotIdealOctave,'green');
+stem(x_val,plotBestMinorLadderWL,'red');
+title('Best minor Ladder');
+xlabel('wavlength[nm]');
 

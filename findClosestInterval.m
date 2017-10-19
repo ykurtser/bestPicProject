@@ -1,4 +1,4 @@
-function [ BestFittingDegreeInScale, MinErr ] = findClosestInterval(TheoreticalOctaveMatInFreq,MeasuredWLArr )
+function [ BestFittingDegreeInScale, AbsMinErr,SignedMinErr ] = findClosestInterval(TheoreticalOctaveMatInFreq,MeasuredWLArr )
 %OctaveMat rows contain octaves with main frequency componant as basic  
 %findClosestInterval  
 %
@@ -22,14 +22,16 @@ function [ BestFittingDegreeInScale, MinErr ] = findClosestInterval(TheoreticalO
 
 MeasuredFrequencies=MeasuredWLArr.^(-1)*100;
 numOfMeasuredPicks=length(MeasuredFrequencies);
-MinErr=zeros(size( TheoreticalOctaveMatInFreq,1),numOfMeasuredPicks);
-size(MinErr)
+AbsMinErr=zeros(size( TheoreticalOctaveMatInFreq,1),numOfMeasuredPicks);
+SignedMinErr=zeros(size( TheoreticalOctaveMatInFreq,1),numOfMeasuredPicks);
+size(AbsMinErr)
 BestFittingDegreeInScale=zeros(numOfMeasuredPicks);
 for i=1:size( TheoreticalOctaveMatInFreq,1)
     for j=1:numOfMeasuredPicks 
         
-         err = abs(MeasuredFrequencies(j)-TheoreticalOctaveMatInFreq(i,:));            
-         [MinErr(i,j),BestFittingDegreeInScale(i,j)] = min(err); %index of closest value
+         err = (MeasuredFrequencies(j)-TheoreticalOctaveMatInFreq(i,:));            
+         [AbsMinErr(i,j),BestFittingDegreeInScale(i,j)] = min(abs(err)); %index of closest value
+         SignedMinErr(i,j) = sign(err(BestFittingDegreeInScale(i,j)))*AbsMinErr(i,j);
 
     end
 end
