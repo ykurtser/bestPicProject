@@ -48,6 +48,11 @@ ylabel('weight[au]');
 %%
 [IndicesOfMaxValuesInSpectogram,MaxPicksValues] = GetPickLambdaFromSpectogram(numOfPicks,Spectogram);
 numOfPicks = min(size(IndicesOfMaxValuesInSpectogram,2),7);
+if (numOfPicks < 3)
+    FreqDistance = -1;
+    LadderCompatible = -1;
+    return;
+end
 WLOfGivenMaxIndices = x_val(IndicesOfMaxValuesInSpectogram);
 TheroticalOctaveMat  = buildOctaves( WLOfGivenMaxIndices );
 [closestInterval, MinErr] = findClosestInterval(TheroticalOctaveMat,WLOfGivenMaxIndices );
