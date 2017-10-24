@@ -6,15 +6,16 @@ args = load('preCalcArgs');
 GaussiansMat = args.preCalcGauss;
 resulution = args.SpectSize;
 calcGroupSize = args.calcGroupSize;
-
+picLocation = join(['/Users/ykurtser/desktop/colorwheel harmoies/complementry harmony/',fileName]);
 %CONSTS
 HueToWLRotationValue = 14;
 numOfPicks=7;
 %Configuration Variables
 SpectroAmplitudeLuminConversion = false;
+DoCorrection = true;
 
 %Reading the image
-Im = imread(fileName);
+Im = imread(picLocation);
 normalizedIm = floor(Im/calcGroupSize)+1;
 %Im = AllColorTests()
 imshow(Im); %Show the given Image
@@ -34,8 +35,7 @@ for i=1:x
 end
 histo = repmat(histo,1,1,1,256);
 GaussiansMat = histo.*GaussiansMat;
-Spectogram(:) = sum(sum(sum(GaussiansMat,1),2),3)
-
+Spectogram(:) = sum(sum(sum(GaussiansMat,1),2),3);
 %%
 x_val = fliplr(1:resulution);
 x_val = Hue2WaveLength(x_val,resulution);
@@ -46,7 +46,7 @@ title('spctogram 3');
 xlabel('wavlength[nm]');
 ylabel('weight[au]');
 %%
-[IndicesOfMaxValuesInSpectogram,MaxPicksValues] = GetPickLambdaFromSpectogram(numOfPicks,Spectogram);
+[IndicesOfMaxValuesInSpectogram,maxPeaksValues, peakEdges] = GetPickLambdaFromSpectogram(numOfPicks,Spectogram);
 numOfPicks = min(size(IndicesOfMaxValuesInSpectogram,2),7);
 if (numOfPicks < 3)
     FreqDistance = -1;
@@ -75,11 +75,11 @@ closestintervals
 %%plotting
 roundIdealHue=WaveLength2Hue( idealWavlengths, resulution );
 IdealWLPeaks=zeros(1,256);
-IdealWLPeaks(resulution-roundIdealHue)=MaxPicksValues;
+IdealWLPeaks(resulution-roundIdealHue)=MaxPeaksValues;
 plotIdealOctave=zeros(1,256);
 IdealOctaveInWL=fliplr(TheroticalOctaveMat(baseFreqIndex,:).^-1)*100;
 IdealOctaveInHue=WaveLength2Hue(IdealOctaveInWL,resulution);
-plotIdealOctave(resulution-IdealOctaveInHue)=min(MaxPicksValues);
+plotIdealOctave(resulution-IdealOctaveInHue)=min(MaxPeaksValues);
 figure;
 plot(x_val,Spectogram);
 hold on;
@@ -100,12 +100,15 @@ toc
 major=[2,2,1,2,2,2,1]
 minor=[2,1,2,2,1,2,2]
 referenceOctave=TheroticalOctaveMat(baseFreqIndex,:);
-[  StartNoteMajor,clostestNotesMajor,ErrorInEachRowMajor,BestLadderMajor,SignedMinErrMajor ] = CalcDistanceFromLadder( MaxPicksValues,referenceOctave,major )
-[  StartNoteMinor,clostestNotesMinor,ErrorInEachRowMinor,BestLadderMinor,SignedMinErrMinor ] = CalcDistanceFromLadder( MaxPicksValues,referenceOctave,minor )
+[  StartNoteMajor,clostestNotesMajor,ErrorInEachRowMajor,BestLadderMajor,SignedMinErrMajor ] = CalcDistanceFromLadder( MaxPeaksValues,referenceOctave,major )
+[  StartNoteMinor,clostestNotesMinor,ErrorInEachRowMinor,BestLadderMinor,SignedMinErrMinor ] = CalcDistanceFromLadder( MaxPeaksValues,referenceOctave,minor )
 plotBestMajorLadderWL=zeros(256,1);
 IdealLadderInHue=WaveLength2Hue((fliplr((BestLadderMajor/100).^-1)),resulution);
-plotBestMajorLadderWL(resulution-IdealLadderInHue)=min(MaxPicksValues);
+plotBestMajorLadderWL(resulution-IdealLadderInHue)=min(MaxPeaksValues);
 
+if(DoCorrection)
+%    correctedIm
+end
 
 figure;
 plot(x_val,Spectogram);
@@ -118,7 +121,7 @@ xlabel('wavlength[nm]');
 
 plotBestMinorLadderWL=zeros(256,1);
 IdealLadderInHue=WaveLength2Hue((fliplr((BestLadderMinor/100).^-1)),resulution);
-plotBestMinorLadderWL(resulution-IdealLadderInHue)=min(MaxPicksValues);
+plotBestMinorLadderWL(resulution-IdealLadderInHue)=min(MaxPeaksValues);
 
  figure;
  plot(x_val,Spectogram);
