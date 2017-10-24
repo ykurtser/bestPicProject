@@ -12,7 +12,6 @@ HsvIm = rgb2hsv(origIm);
 for i = 1:size(origIm,1)
    for j = 1:size(origIm,2)
       currPeak = findPixelsPeak(peakIntervals,HsvIm(i,j,1));
-      currPeak
       if(currPeak ~= 0)
          HsvIm(i,j,1) = mod(((HsvIm(i,j,1)*255) + (-1) * correctionArray(currPeak)),255)/255;
       end
