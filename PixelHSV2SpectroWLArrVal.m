@@ -12,7 +12,7 @@ if (Variance == 0)
     Variance = 0.01;
 end
 
-x_gaussian = 0:1:255;
+x_gaussian = 1:1:res;
 y_gaussian = gaussmf(x_gaussian,[Variance res-mean]);
 y_gaussian(y_gaussian<0.01) = 0;
 y_gaussian(y_gaussian>0.99) = 1;
