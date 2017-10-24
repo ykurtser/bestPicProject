@@ -1,11 +1,13 @@
 clc
 clear all
-photosLocation='./photoDb/';
-imageNames = dir(join([photosLocation,'*.jpg']));%looks for all the jpg photos names under ./photoDb/
+imFolder='./photoDb/';
+imageNames = dir(join([imFolder,'*.jpg']));%looks for all the jpg photos names under ./photoDb/
 photosMap = containers.Map; %key: photo Id, value: struct holding all the 
                             %info (given and calculated params)
 fileID = fopen('photonet_dataset_orig.txt');
 parsed = textscan(fileID,'%s %s %d %f %f %s %s %s %s %s %s %s'); 
+
+doCorrection = true;
 
 %parsed columns are: 1:index, 2: ID, 3: num of votes, 4:median of votes(1-7) 5:
 %deviation of rating, 6-12 Distribution (counts) of aesthetics ratings in
@@ -18,10 +20,21 @@ for i = 1:size(parsed{1},1)
    photosMap(parsed{2}{i}) = currStruct;
 end
 for i = 1:size(imageNames)
-    [currFreqDistance,currLadderCompatible] = process(imageNames(i).name);
+    [currFreqDistance,currLadderCompatible,currLadderErrInHue,currOctaveErrInHue, currpeaksedges] = process(imageNames(i).name);
     if(currLadderCompatible == -1)
-        delete(join([photosLocation,process(imageNames(i).name)]));
+        delete(join([imFolder,process(imFolder,imageNames(i).name)]));
         continue;
+    end
+    if(doCorrection)
+        imLocation = join([imFolder,fileName]);
+        im2Correct = imread(imLocation);
+        if (max(max(max(im2Correct))) > 1)   %if in uint 8 convert to 0-1 double
+           im2Correct = double(im2Correct) / 255; 
+        end
+        CorrectedIm = correctImHue(im2Correct,currpeaksedges,currOctaveErrInHue);
+        figure
+        title('Corected image');
+        imshow(CorrectedIm)
     end
     bracketLocation=strfind(imageNames(i).name,'-'); %all file names are Id-something.jpeg
     currPhotoId = imageNames(i).name(1:bracketLocation-1);

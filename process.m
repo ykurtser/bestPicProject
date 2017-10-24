@@ -1,4 +1,4 @@
-function [FreqDistance,LadderCompatible] = process(fileName);
+function [FreqDistance,LadderCompatible,LadderErrInHue,OctaveErrInHue, peaksedges] = process(imFolder,fileName);
 
 tic
 %Loading precalc gaussians and predefined args
@@ -6,7 +6,7 @@ args = load('preCalcArgs');
 GaussiansMat = args.preCalcGauss;
 resulution = args.SpectSize;
 calcGroupSize = args.calcGroupSize;
-picLocation = join(['/Users/ykurtser/desktop/colorwheel harmoies/complementry harmony/',fileName]);
+imLocation = join([imFolder,fileName]);
 %CONSTS
 HueToWLRotationValue = 14;
 numOfPicks=7;
@@ -15,7 +15,7 @@ SpectroAmplitudeLuminConversion = false;
 DoCorrection = true;
 
 %Reading the image
-Im = imread(picLocation);
+Im = imread(imLocation);
 normalizedIm = floor(Im/calcGroupSize)+1;
 %Im = AllColorTests()
 imshow(Im); %Show the given Image
@@ -48,7 +48,8 @@ ylabel('weight[au]');
 %%
 [IndicesOfMaxValuesInSpectogram,maxPeaksValues, peakEdges] = GetPickLambdaFromSpectogram(numOfPicks,Spectogram);
 numOfPicks = min(size(IndicesOfMaxValuesInSpectogram,2),7);
-if (numOfPicks < 3)
+peaksedges = peakEdges;
+if (numOfPicks < 2)
     FreqDistance = -1;
     LadderCompatible = -1;
     return;
@@ -57,9 +58,10 @@ WLOfGivenMaxIndices = x_val(IndicesOfMaxValuesInSpectogram);
 TheroticalOctaveMat  = buildOctaves( WLOfGivenMaxIndices );
 [closestInterval, MinErr] = findClosestInterval(TheroticalOctaveMat,WLOfGivenMaxIndices );
 %%
+
  ErrorInEachRowMajor=sum(MinErr');
  [octMinErr,baseFreqIndex]=min(ErrorInEachRowMajor)
-
+OctaveErrInHue=WaveLenght2Hue((MinErr(baseFreqIndex,:)/100)^-1,resolution)
 %tempMat = circshift(closestInterval,[0 -baseFreqIndex])
 [classification,avgErr,var,grade] = classify(WLOfGivenMaxIndices,4,MinErr(baseFreqIndex,:),0.3,TheroticalOctaveMat(baseFreqIndex,:),closestInterval(baseFreqIndex,:)) 
 for i=1:numOfPicks
@@ -106,14 +108,10 @@ referenceOctave=TheroticalOctaveMat(baseFreqIndex,:);
 plotBestMajorLadderWL=zeros(256,1);
 IdealLadderInHue=WaveLength2Hue((fliplr((BestLadderMajor/100).^-1)),resulution);
 plotBestMajorLadderWL(resulution-IdealLadderInHue)=min(MaxPicksValues);
-
+LadderErrInHue=WaveLength2Hue((fliplr((ErrorInEachRowMajor(StartNoteMinor,:)/100).^-1)),resulution);
 figure;
 plot(x_val,Spectogram);
 hold on;
-
-if(DoCorrection)
-%    correctedIm
-end
 
 stem(x_val,plotIdealOctave,'green');
 stem(x_val,plotBestMajorLadderWL,'red');
