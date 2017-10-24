@@ -61,7 +61,7 @@ TheroticalOctaveMat  = buildOctaves( WLOfGivenMaxIndices );
  [octMinErr,baseFreqIndex]=min(ErrorInEachRowMajor)
 
 %tempMat = circshift(closestInterval,[0 -baseFreqIndex])
-
+[classification,avgErr,var,grade] = classify(WLOfGivenMaxIndices,4,MinErr(baseFreqIndex,:),0.3,TheroticalOctaveMat(baseFreqIndex,:),closestInterval(baseFreqIndex,:)) 
 for i=1:numOfPicks
    closestintervals(i)= TheroticalOctaveMat(baseFreqIndex,closestInterval(baseFreqIndex,i));
 end
@@ -102,6 +102,7 @@ minor=[2,1,2,2,1,2,2]
 referenceOctave=TheroticalOctaveMat(baseFreqIndex,:);
 [  StartNoteMajor,clostestNotesMajor,ErrorInEachRowMajor,BestLadderMajor,SignedMinErrMajor ] = CalcDistanceFromLadder( MaxPicksValues,referenceOctave,major )
 [  StartNoteMinor,clostestNotesMinor,ErrorInEachRowMinor,BestLadderMinor,SignedMinErrMinor ] = CalcDistanceFromLadder( MaxPicksValues,referenceOctave,minor )
+[classification,avgErr,var,grade] = classify(WLOfGivenMaxIndices,4,SignedMinErrMajor(StartNoteMajor,:),0.3,BestLadderMajor,clostestNotesMajor(StartNoteMajor,:)) 
 plotBestMajorLadderWL=zeros(256,1);
 IdealLadderInHue=WaveLength2Hue((fliplr((BestLadderMajor/100).^-1)),resulution);
 plotBestMajorLadderWL(resulution-IdealLadderInHue)=min(MaxPicksValues);
