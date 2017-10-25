@@ -32,9 +32,14 @@ for i = 1:size(imageNames)
            im2Correct = double(im2Correct) / 255; 
         end
         CorrectedIm = correctImHue(im2Correct,currpeaksedges,currOctaveErrInHue);
-        figure
-        title('Corected image');
+         figure;
+        
+        imshow(im2Correct)
+        title('original image');
+        figure;
+        
         imshow(CorrectedIm)
+        title('Corected image');
     end
     %bracketLocation=strfind(imageNames(i).name,'-'); %all file names are Id-something.jpeg
     %currPhotoId = imageNames(i).name(1:bracketLocation-1);
@@ -44,6 +49,6 @@ for i = 1:size(imageNames)
     %end
     %currStruct = photosMap(currPhotoId);
 
-    photosMap(currPhotoId) = currStruct;
+%    photosMap(currPhotoId) = currStruct;
     
 end

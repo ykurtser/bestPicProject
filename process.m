@@ -63,7 +63,7 @@ TheroticalOctaveMat  = buildOctaves( WLOfGivenMaxIndices );
 
  ErrorInEachRowMajor=sum(MinErr');
  [octMinErr,baseFreqIndex]=min(ErrorInEachRowMajor)
-OctaveErrInHue=WaveLength2Hue((MinErr(baseFreqIndex,:).^-1)*100,resulution)
+
 %tempMat = circshift(closestInterval,[0 -baseFreqIndex])
 [classification,avgErr,var,grade] = classify(WLOfGivenMaxIndices,length(WLOfGivenMaxIndices),MinErr(baseFreqIndex,:),0.3,TheroticalOctaveMat(baseFreqIndex,:),closestInterval(baseFreqIndex,:)) 
 for i=1:numOfPicks
@@ -74,7 +74,7 @@ WLOfGivenMaxIndices
 IndicesOfMaxValuesInSpectogram
 %%MaxIndArr = FilterMeaningfulPeaksOnly(MaxIndArr,Spectogram,10,SpectroAmplitudeLuminConversion,res);
 closestintervals
-
+OctaveErrInHue=WaveLength2Hue(WLOfGivenMaxIndices-idealWavlengths,resulution)
 
 %%plotting
 roundIdealHue=WaveLength2Hue( idealWavlengths, resulution );
