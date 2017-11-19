@@ -122,22 +122,12 @@ if(showGraphs)
     hold on;
 
     stem(x_val,plotIdealOctave,'green');
-    stem(x_val,plotBestMajorLadderWL,'red');
+    stem(x_val,plotBestLadderWL,'red');
     title('Best major Ladder');
     xlabel('wavlength[nm]');
 
-    plotBestMinorLadderWL=zeros(256,1);
-    IdealLadderInHue=WaveLength2Hue((fliplr((BestLadderMinor/100).^-1)),resulution);
-    plotBestMinorLadderWL(resulution-IdealLadderInHue)=min(maxPeaksValues);
-
-    figure;
-    plot(x_val,Spectogram);
-    hold on;
-
-    stem(x_val,plotIdealOctave,'green');
-    stem(x_val,plotBestMinorLadderWL,'red');
-    title('Best minor Ladder');
-    xlabel('wavlength[nm]');
+ 
+   
 end
 
 if(doCorrection)
