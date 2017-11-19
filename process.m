@@ -1,4 +1,4 @@
-function [FreqDistance,LadderCompatible,OctaveErrInHue, peaksedges] = process(imFolder,fileName);
+function [classification,avgErr,var,grade,FreqDistance,LadderCompatible,OctaveErrInHue, peaksedges] = process(imFolder,fileName);
 
 
 tic
@@ -107,15 +107,14 @@ end
 toc
 %% match to ladders
 % in a ladder, 1 is half a tone and 2 is a tone
-major=[2,2,1,2,2,2,1]
-minor=[2,1,2,2,1,2,2]
+
 referenceOctave=TheroticalOctaveMat(baseFreqIndex,:);
-[  StartNoteMajor,clostestNotesMajor,ErrorInEachRowMajor,BestLadderMajor,SignedMinErrMajor ] = CalcDistanceFromLadder( maxPeaksValues,referenceOctave,major );
-[  StartNoteMinor,clostestNotesMinor,ErrorInEachRowMinor,BestLadderMinor,SignedMinErrMinor ] = CalcDistanceFromLadder( maxPeaksValues,referenceOctave,minor );
-[classification,avgErr,var,grade] = classify(WLOfGivenMaxIndices,4,SignedMinErrMajor(StartNoteMajor,:),0.3,BestLadderMajor,clostestNotesMajor(StartNoteMajor,:)) ;
-plotBestMajorLadderWL=zeros(256,1);
-IdealLadderInHue=WaveLength2Hue((fliplr((BestLadderMajor/100).^-1)),resulution);
-plotBestMajorLadderWL(resulution-IdealLadderInHue)=min(maxPeaksValues);
+[bestLadder,signedErr,closestNotesIndexes] = findBestLadder(WLOfGivenMaxIndices,referenceOctave)
+
+[distanceRatioLadder,classification,avgErr,var,grade] = classify(WLOfGivenMaxIndices,length(WLOfGivenMaxIndices)-1,signedErr,25,bestLadder,closestNotesIndexes) 
+plotBestLadderWL=zeros(256,1);
+IdealLadderInHue=WaveLength2Hue((fliplr((bestLadder/100).^-1)),resulution);
+plotBestLadderWL(resulution-IdealLadderInHue)=min(maxPeaksValues);
 %LadderErrInHue=WaveLength2Hue((fliplr((ErrorInEachRowMajor(StartNoteMajor,:)/100).^-1)),resulution);
 if(showGraphs)
     figure;

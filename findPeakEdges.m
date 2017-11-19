@@ -4,7 +4,6 @@ function [peaksEdges] = findPeakEdges(Spectro, IndexArray)
     %of 2 edges of corresponding peak i
     initStruct.leftEdge = 0;
     initStruct.rightEdge = 0;
-    IndexArray
     peaksEdges(length(IndexArray)) = initStruct;
     for i = 1:(length(IndexArray))
         %find left edge for current peak

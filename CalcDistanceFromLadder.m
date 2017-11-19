@@ -1,4 +1,4 @@
-function [ StartNote,clostestNotes,avgErrorInEachRow,BestLadderWL,SignedMinErr ] = CalcDistanceFromLadder( WLpeaks,idealOctave,Ladder )
+function [ closestNotes,AbsMinErr,SignedMinErr ] = CalcDistanceFromLadder( WLpeaks,referenceLadder )
 %UNTITLED2 Summary of this function goes here
 %   this function test how close are measured peaks to a known musical
 %   ladder.
@@ -16,32 +16,21 @@ function [ StartNote,clostestNotes,avgErrorInEachRow,BestLadderWL,SignedMinErr ]
 %  StartNote = start note of ladder that minimizes error
 %   DistanceFromLadder= minimal absolute error
 
-%% build reference ladder
-% this creates a matrix of ladders starting at each possible note (row
-% number is starting note)
-idealOctave
-ReferenceLadder=zeros(12,length(Ladder));
 
-for i=1:12
-    index=1;
-    
-    for j=1:length(Ladder)
-        ReferenceLadder(i,j)=idealOctave(index);
-        index=mod(index+Ladder(j),12);
-        if index == 0
-            index=12;
-        end
-    end
-    idealOctave= circshift(idealOctave,-1,2);
-end
+
 
 %% calc distance from notes in refernce ladder
+numOfMeasuredPicks=length(WLpeaks);
+AbsMinErr=zeros(1,numOfMeasuredPicks);
+SignedMinErr=zeros(1,numOfMeasuredPicks);
+closestNotes=zeros(1,numOfMeasuredPicks);
+MeasuredFrequencies=WLpeaks.^(-1)*100;
+     for j=1:numOfMeasuredPicks    
+        err = (MeasuredFrequencies(j)-referenceLadder);            
+         [AbsMinErr(j),closestNotes(j)] = min(abs(err)); %index of closest value
+         SignedMinErr(j) = sign(err(closestNotes(j)))*AbsMinErr(j);
+     end
 
-[ clostestNotes, AbsMinErr,SignedMinErr ] = findClosestInterval(ReferenceLadder,WLpeaks );
-AbsMinErr
- avgErrorInEachRow=sum(AbsMinErr')/length(WLpeaks);
- [~,StartNote]=min(avgErrorInEachRow) 
-BestLadderWL=ReferenceLadder(StartNote,:);
 
 end
 

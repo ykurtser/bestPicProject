@@ -1,7 +1,7 @@
 clc
 clear all
 imFolder='./photos/';
-imageNames = dir(join([imFolder,'*.jpg']));%looks for all the jpg photos names under ./photoDb/
+imageNames = dir(join([imFolder,'*.png']));%looks for all the jpg photos names under ./photoDb/
 %photosMap = containers.Map; %key: photo Id, value: struct holding all the 
                             %info (given and calculated params)
 %fileID = fopen('photonet_dataset_orig.txt
@@ -18,7 +18,7 @@ imageNames = dir(join([imFolder,'*.jpg']));%looks for all the jpg photos names u
    %photosMap(parsed{2}{i}) = currStruct;
 %end
 for i = 1:size(imageNames)
-    [currFreqDistance,currLadderCompatible,currOctaveErrInHue, currpeaksedges] = process(imFolder,imageNames(i).name);
+    [currclassification,curravgErr,currvar,currgrade,currFreqDistance,currLadderCompatible,currOctaveErrInHue, currpeaksedges] = process(imFolder,imageNames(i).name)
     if(currLadderCompatible == -1)
         delete(join([imFolder,process(imFolder,imageNames(i).name)]));
         continue;
