@@ -1,13 +1,11 @@
 clc
 clear all
 imFolder='./photos/';
-imageNames = dir(join([imFolder,'*.png']));%looks for all the jpg photos names under ./photoDb/
+imageNames = dir(join([imFolder,'*.jpg']));%looks for all the jpg photos names under ./photoDb/
 %photosMap = containers.Map; %key: photo Id, value: struct holding all the 
                             %info (given and calculated params)
-%fileID = fopen('photonet_dataset_orig.txt');
+%fileID = fopen('photonet_dataset_orig.txt
 %parsed = textscan(fileID,'%s %s %d %f %f %s %s %s %s %s %s %s'); 
-
-doCorrection = true;
 
 %parsed columns are: 1:index, 2: ID, 3: num of votes, 4:median of votes(1-7) 5:
 %deviation of rating, 6-12 Distribution (counts) of aesthetics ratings in
@@ -24,22 +22,6 @@ for i = 1:size(imageNames)
     if(currLadderCompatible == -1)
         delete(join([imFolder,process(imFolder,imageNames(i).name)]));
         continue;
-    end
-    if(doCorrection)
-        imLocation = join([imFolder,imageNames(i).name]);
-        im2Correct = imread(imLocation);
-        if (max(max(max(im2Correct))) > 1)   %if in uint 8 convert to 0-1 double
-           im2Correct = double(im2Correct) / 255; 
-        end
-        CorrectedIm = correctImHue(im2Correct,currpeaksedges,currOctaveErrInHue);
-         figure;
-        
-        imshow(im2Correct)
-        title('original image');
-        figure;
-        
-        imshow(CorrectedIm)
-        title('Corected image');
     end
     %bracketLocation=strfind(imageNames(i).name,'-'); %all file names are Id-something.jpeg
     %currPhotoId = imageNames(i).name(1:bracketLocation-1);
