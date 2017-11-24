@@ -1,21 +1,25 @@
-function [classification,avgErr,var,grade,FreqDistance,LadderCompatible,OctaveErrInHue, peaksedges] = process(imFolder,fileName);
+function [classification,avgErr,var,grade,FreqDistance,LadderCompatible,OctaveErrInHue, peaksedges] = process(imFolder,fileName,showGraphs,doCorrection,saveCorrectedIm,saveGraphs,playPics);
 
 
 tic
+classification=-1;
+avgErr=-1;
+var=-1;
+grade=-1;
+OctaveErrInHue = -1;
+peaksedges = -1;
 LadderCompatible = 0;
 FreqDistance = 0;
 %Loading precalc gaussians and predefined args
 imLocation = join([imFolder,fileName]);
+dotLocation=strfind(imLocation(2:end),'.')+1;
 %CONSTS
 HueToWLRotationValue = 14;
 numOfPicks=7;
 cornumOfPicks=7;
 %Configuration Variables
 SpectroAmplitudeLuminConversion = false;
-showGraphs = true;
-doCorrection = true;
-playPics = true;
-
+graphCount=0;
 args = load('preCalcArgs');
 GaussiansMat = args.preCalcGauss;
 resulution = args.SpectSize;
@@ -42,18 +46,8 @@ end
 histo = repmat(histo,1,1,1,256);
 GaussiansMat = histo.*GaussiansMat;
 Spectogram(:) = sum(sum(sum(GaussiansMat,1),2),3);
-%%
-x_val = fliplr(1:resulution);
-x_val = Hue2WaveLength(x_val,resulution);
-if(showGraphs)
-    figure;
-    plot(x_val,Spectogram);
-    title('spctogram 3');
-    xlabel('wavlength[nm]');
-    ylabel('weight[au]');
-end
-%%
-[IndicesOfMaxValuesInSpectogram,maxPeaksValues, peakEdges] = GetPickLambdaFromSpectogram(numOfPicks,Spectogram)
+
+[IndicesOfMaxValuesInSpectogram,maxPeaksValues, peakEdges] = GetPickLambdaFromSpectogram(numOfPicks,Spectogram);
 numOfPicks = min(size(IndicesOfMaxValuesInSpectogram,2),7);
 peaksedges = peakEdges;
 if (numOfPicks < 2)
@@ -61,6 +55,28 @@ if (numOfPicks < 2)
     LadderCompatible = -1;
     return;
 end
+
+%%
+x_val = fliplr(1:resulution);
+x_val = Hue2WaveLength(x_val,resulution);
+if(showGraphs || saveGraphs)
+    f0 = figure;
+    plot(x_val,Spectogram);
+    title('spctogram 3');
+    xlabel('wavlength[nm]');
+    ylabel('weight[au]');
+    if(saveGraphs)
+%        imLocation
+           currGraphLocation = join([imLocation(1:dotLocation-1),'-Graph',num2str(graphCount),imLocation(dotLocation:end)]); 
+           graphCount = graphCount+1;
+           saveas(f0,currGraphLocation);
+    end
+    if(~showGraphs)
+        close(f0)
+    end
+end
+%%
+
 WLOfGivenMaxIndices = x_val(IndicesOfMaxValuesInSpectogram);
 TheroticalOctaveMat  = buildOctaves( WLOfGivenMaxIndices );
 [closestInterval, MinErr] = findClosestInterval(TheroticalOctaveMat,WLOfGivenMaxIndices );
@@ -70,7 +86,7 @@ TheroticalOctaveMat  = buildOctaves( WLOfGivenMaxIndices );
  [octMinErr,baseFreqIndex]=min(ErrorInEachRowMajor);
 
 %tempMat = circshift(closestInterval,[0 -baseFreqIndex])
-[classification,avgErr,var,grade] = classify(WLOfGivenMaxIndices,length(WLOfGivenMaxIndices),MinErr(baseFreqIndex,:),0.3,TheroticalOctaveMat(baseFreqIndex,:),closestInterval(baseFreqIndex,:));
+[distanceRatio,classsification,avgErr,var,grade] = classify(WLOfGivenMaxIndices,length(WLOfGivenMaxIndices),MinErr(baseFreqIndex,:),0.3,TheroticalOctaveMat(baseFreqIndex,:),closestInterval(baseFreqIndex,:));
 for i=1:numOfPicks
    closestintervals(i)= TheroticalOctaveMat(baseFreqIndex,closestInterval(baseFreqIndex,i));
 end
@@ -88,8 +104,8 @@ plotIdealOctave=zeros(1,256);
 IdealOctaveInWL=fliplr(TheroticalOctaveMat(baseFreqIndex,:).^-1)*100;
 IdealOctaveInHue=WaveLength2Hue(IdealOctaveInWL,resulution);
 plotIdealOctave(resulution-IdealOctaveInHue)=min(maxPeaksValues);
-if(showGraphs)
-    figure;
+if(showGraphs || saveGraphs)
+    f1 = figure;
     plot(x_val,Spectogram);
     hold on;
     stem(x_val,plotIdealOctave,'red');
@@ -97,12 +113,24 @@ if(showGraphs)
     title('spctogram 3');
     xlabel('wavlength[nm]');
     ylabel('weight[au]');
-
-    figure;
+    
+    f2 = figure;
     plot(1:numOfPicks,ErrorInEachRowMajor);
     title('sum of absolute error');
     xlabel('base frequency[THz]');
     ylabel('error');
+    if(saveGraphs)
+        currGraphLocation = join([imLocation(1:dotLocation-1),'-Graph',num2str(graphCount),imLocation(dotLocation:end)]); 
+        graphCount = graphCount+1;
+        saveas(f1,currGraphLocation);
+        currGraphLocation = join([imLocation(1:dotLocation-1),'-Graph',num2str(graphCount),imLocation(dotLocation:end)]); 
+        graphCount = graphCount+1;
+        saveas(f2,currGraphLocation);
+    end
+    if(~showGraphs)
+        close(f1)
+        close(f2)
+    end
 end
 toc
 %% match to ladders
@@ -116,8 +144,8 @@ plotBestLadderWL=zeros(256,1);
 IdealLadderInHue=WaveLength2Hue((fliplr((bestLadder/100).^-1)),resulution);
 plotBestLadderWL(resulution-IdealLadderInHue)=min(maxPeaksValues);
 %LadderErrInHue=WaveLength2Hue((fliplr((ErrorInEachRowMajor(StartNoteMajor,:)/100).^-1)),resulution);
-if(showGraphs)
-    figure;
+if(showGraphs || saveGraphs)
+    f3 = figure;
     plot(x_val,Spectogram);
     hold on;
 
@@ -125,9 +153,14 @@ if(showGraphs)
     stem(x_val,plotBestLadderWL,'red');
     title('Best major Ladder');
     xlabel('wavlength[nm]');
-
- 
-   
+    if(saveGraphs)
+        currGraphLocation = join([imLocation(1:dotLocation-1),'-Graph',num2str(graphCount),imLocation(dotLocation:end)]); 
+%        graphCount = graphCount+1;
+        saveas(f3,currGraphLocation);
+    end
+    if(~showGraphs)
+        close(f3)
+    end
 end
 
 if(doCorrection)
@@ -135,20 +168,24 @@ if(doCorrection)
     if (max(max(max(im2Correct))) > 1)   %if in uint 8 convert to 0-1 double
        im2Correct = double(im2Correct) / 255; 
     end
-    OctaveErrInHue
-    WLOfGivenMaxIndices-idealWavlengths
+%    OctaveErrInHue
+%    WLOfGivenMaxIndices-idealWavlengths
     CorrectedIm = correctImHue(im2Correct,peaksedges,(OctaveErrInHue));
-    figure;
+    if(showGraphs)
+        figure;
+        imshow(im2Correct)
+        title('original image');
+        figure;
     
-    imshow(im2Correct)
-    title('original image');
-    figure;
-    
-    class(CorrectedIm)
-    max(max(CorrectedIm))
-    imshow(CorrectedIm)
-    title('Corrected image');
-    imwrite(CorrectedIm,'./photos/corrected.png')
+        class(CorrectedIm)
+        max(max(CorrectedIm))
+        imshow(CorrectedIm)
+        title('Corrected image');
+    end
+    if(saveCorrectedIm)
+        correctedImLocation = join([imLocation(1:dotLocation-1),'-corrected',imLocation(dotLocation:end)]);
+        imwrite(CorrectedIm,correctedImLocation)
+    end
 end
 
 
@@ -158,3 +195,4 @@ if(playPics)
         playPicture(CorrectedIm,IndicesOfMaxValuesInSpectogram,-1*(OctaveErrInHue));
     end
 end
+
