@@ -6,7 +6,7 @@ clear all
 
 saturationThreshold = 0.5;
 volumeThreshold = 0.2;
-imageNames = dir('*.jpg');
+imageNames = dir('./photos/*.jpg');
 deleteCount = 0;
 remainCount = 0;
 for i = 1:size(imageNames)
@@ -17,9 +17,10 @@ for i = 1:size(imageNames)
     end
     numOfPixels = 0;
     totalSaturation = 0;
-    currIm = imread(imageNames(i).name);
+    imageNames(i).name
+    currIm = imread(['./photos/' imageNames(i).name]);
     if(size(currIm,3)<3)
-        delete(imageNames(i).name);
+        delete(['./photos/' imageNames(i).name]);
         deleteCount = deleteCount+1;
         continue;
     end
@@ -34,7 +35,7 @@ for i = 1:size(imageNames)
     end
     averageSaturation = totalSaturation/numOfPixels;
     if(averageSaturation < saturationThreshold)
-        delete(imageNames(i).name);
+        delete(['./photos/' imageNames(i).name]);
         deleteCount = deleteCount+1;
     else
         remainCount = remainCount+1;

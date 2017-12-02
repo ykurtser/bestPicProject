@@ -16,10 +16,10 @@ end
 sum(matchedpeaks)
 numOfPeaksRestricted
 if sum(matchedpeaks)>=numOfPeaksRestricted
-    avgErr=sum(abs(signedErrVec.*matchedpeaks))/sum(matchedpeaks);
-    var=sum(signedErrVec.^2.*matchedpeaks/sum(matchedpeaks))-avgErr^2;
     classsification=1;
 end
-avgDistanceRatio=sum(distanceRatio)/length(matchedpeaks)
-grade=(1-avgDistanceRatio/50)*7
+avgErr=sum(abs(signedErrVec.*matchedpeaks))/sum(matchedpeaks);
+var=sum(signedErrVec.^2.*matchedpeaks/sum(matchedpeaks))-avgErr^2;
+avgDistanceRatio=sum(distanceRatio)/length(distanceRatio);
+grade=(1-avgDistanceRatio/50)*7;
 

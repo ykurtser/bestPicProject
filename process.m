@@ -15,7 +15,7 @@ imLocation = join([imFolder,fileName]);
 dotLocation=strfind(imLocation(2:end),'.')+1;
 %CONSTS
 HueToWLRotationValue = 14;
-numOfPicks=7;
+numOfPicks=6;
 cornumOfPicks=7;
 %Configuration Variables
 SpectroAmplitudeLuminConversion = false;
@@ -86,7 +86,7 @@ TheroticalOctaveMat  = buildOctaves( WLOfGivenMaxIndices );
  [octMinErr,baseFreqIndex]=min(ErrorInEachRowMajor);
 
 %tempMat = circshift(closestInterval,[0 -baseFreqIndex])
-[distanceRatio,classsification,avgErr,var,grade] = classify(WLOfGivenMaxIndices,length(WLOfGivenMaxIndices),MinErr(baseFreqIndex,:),0.3,TheroticalOctaveMat(baseFreqIndex,:),closestInterval(baseFreqIndex,:));
+[distanceRatio,classsification,avgErr,var,grade] = classify(WLOfGivenMaxIndices,length(WLOfGivenMaxIndices)-1,MinErr(baseFreqIndex,:),25,TheroticalOctaveMat(baseFreqIndex,:),closestInterval(baseFreqIndex,:))
 for i=1:numOfPicks
    closestintervals(i)= TheroticalOctaveMat(baseFreqIndex,closestInterval(baseFreqIndex,i));
 end
@@ -103,7 +103,7 @@ IdealWLPeaks(resulution-roundIdealHue)=maxPeaksValues;
 plotIdealOctave=zeros(1,256);
 IdealOctaveInWL=fliplr(TheroticalOctaveMat(baseFreqIndex,:).^-1)*100;
 IdealOctaveInHue=WaveLength2Hue(IdealOctaveInWL,resulution);
-plotIdealOctave(resulution-IdealOctaveInHue)=min(maxPeaksValues);
+plotIdealOctave(resulution-IdealOctaveInHue+1)=min(maxPeaksValues);
 if(showGraphs || saveGraphs)
     f1 = figure;
     plot(x_val,Spectogram);
@@ -151,7 +151,7 @@ if(showGraphs || saveGraphs)
 
     stem(x_val,plotIdealOctave,'green');
     stem(x_val,plotBestLadderWL,'red');
-    title('Best major Ladder');
+    title('Best Ladder');
     xlabel('wavlength[nm]');
     if(saveGraphs)
         currGraphLocation = join([imLocation(1:dotLocation-1),'-Graph',num2str(graphCount),imLocation(dotLocation:end)]); 

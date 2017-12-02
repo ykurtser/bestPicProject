@@ -33,9 +33,8 @@ for i = 1:size(imageNames)
     dotLocation=strfind(imageNames(i).name(2:end),'.')+1;
     currPhotoId = imageNames(i).name(1:bracketLocation-1);
     currPhotoExtension = imageNames(i).name(dotLocation:end);
-   
     if( ~photosMap.isKey(currPhotoId) )
-        msg = join(['the photo couldnt be found on dataset txt file',imageNames(i).name]);
+        msg = join(['the photo couldnt be found on dataset txt file',imageNames(i).name])
         continue;
     end
     
