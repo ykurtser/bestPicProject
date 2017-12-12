@@ -2,6 +2,7 @@ function [classification,avgErr,var,grade,FreqDistance,LadderCompatible,OctaveEr
 
 
 tic
+fileName
 classification=-1;
 avgErr=-1;
 var=-1;
@@ -90,7 +91,7 @@ TheroticalOctaveMat  = buildOctaves( WLOfGivenMaxIndices );
 for i=1:numOfPicks
    closestintervals(i)= TheroticalOctaveMat(baseFreqIndex,closestInterval(baseFreqIndex,i));
 end
-idealWavlengths=(closestintervals.^-1) * 100
+idealWavlengths=(closestintervals.^-1) * 100;
 WLOfGivenMaxIndices;
 IndicesOfMaxValuesInSpectogram;
 %%MaxIndArr = FilterMeaningfulPeaksOnly(MaxIndArr,Spectogram,10,SpectroAmplitudeLuminConversion,res);
@@ -137,9 +138,9 @@ toc
 % in a ladder, 1 is half a tone and 2 is a tone
 
 referenceOctave=TheroticalOctaveMat(baseFreqIndex,:);
-[bestLadder,signedErr,closestNotesIndexes] = findBestLadder(WLOfGivenMaxIndices,referenceOctave)
+[bestLadder,signedErr,closestNotesIndexes] = findBestLadder(WLOfGivenMaxIndices,referenceOctave);
 
-[distanceRatioLadder,classification,avgErr,var,grade] = classify(WLOfGivenMaxIndices,length(WLOfGivenMaxIndices)-1,signedErr,25,bestLadder,closestNotesIndexes) 
+[distanceRatioLadder,classification,avgErr,var,grade] = classify(WLOfGivenMaxIndices,length(WLOfGivenMaxIndices)-1,signedErr,25,bestLadder,closestNotesIndexes) ;
 plotBestLadderWL=zeros(256,1);
 IdealLadderInHue=WaveLength2Hue((fliplr((bestLadder/100).^-1)),resulution);
 plotBestLadderWL(resulution-IdealLadderInHue)=min(maxPeaksValues);
@@ -151,7 +152,7 @@ if(showGraphs || saveGraphs)
 
     stem(x_val,plotIdealOctave,'green');
     stem(x_val,plotBestLadderWL,'red');
-    title('Best Ladder');
+    title('Best major Ladder');
     xlabel('wavlength[nm]');
     if(saveGraphs)
         currGraphLocation = join([imLocation(1:dotLocation-1),'-Graph',num2str(graphCount),imLocation(dotLocation:end)]); 

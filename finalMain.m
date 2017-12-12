@@ -15,7 +15,7 @@ photosMap = containers.Map; %key: photo Id, value: struct holding all the
 fileID = fopen('photonet_dataset_orig.txt');
 parsed = textscan(fileID,'%s %s %d %f %f %s %s %s %s %s %s %s'); 
 fclose(fileID);
-
+errorLog='pics with errors: ';
 doCorrection = true;
 
 %parsed columns are: 1:index, 2: ID, 3: num of votes, 4:median of votes(1-7) 5:
@@ -33,13 +33,17 @@ for i = 1:size(imageNames)
     dotLocation=strfind(imageNames(i).name(2:end),'.')+1;
     currPhotoId = imageNames(i).name(1:bracketLocation-1);
     currPhotoExtension = imageNames(i).name(dotLocation:end);
+   
     if( ~photosMap.isKey(currPhotoId) )
-        msg = join(['the photo couldnt be found on dataset txt file',imageNames(i).name])
+        msg = join(['the photo couldnt be found on dataset txt file',imageNames(i).name]);
         continue;
     end
-    
-    [currClassification,currAvgErr,currVar,currGrade,currFreqDistance,currLadderCompatible,currOctaveErrInHue, currpeaksedges]  = process(imFolder,imageNames(i).name,false,true,true,true,false);  %if process finds current image to be uncompatible for analysis, we delete it.
-    
+    try
+        [currClassification,currAvgErr,currVar,currGrade,currFreqDistance,currLadderCompatible,currOctaveErrInHue, currpeaksedges]  = process(imFolder,imageNames(i).name,false,true,true,true,false);  %if process finds current image to be uncompatible for analysis, we delete it.
+    catch ME
+        errorLog=[errorLog, ' ',imageNames(i).name, ':' ME.identifier, '.'];
+        continue;
+    end
     %right now, condition for compatibility is (num of peaks) > 2
     if(currLadderCompatible == -1) 
         continue;
@@ -47,7 +51,13 @@ for i = 1:size(imageNames)
     
     correctedImName = join([imageNames(i).name(1:dotLocation-1),'-corrected',imageNames(i).name(dotLocation:end)]);
     
-    [currCorClassification,currCorAvgErr,currCorVar,currCorGrade,currCorFreqDistance,currCorLadderCompatible,currCorOctaveErrInHue, currCorpeaksedges]  = process(imFolder,correctedImName,false,false,false,true,false);  %if process finds current image to be uncompatible for analysis, we delete it.
+    try
+        [currCorClassification,currCorAvgErr,currCorVar,currCorGrade,currCorFreqDistance,currCorLadderCompatible,currCorOctaveErrInHue, currCorpeaksedges]  = process(imFolder,correctedImName,false,false,false,true,false);  %if process finds current image to be uncompatible for analysis, we delete it.
+    catch ME
+        errorLog=[errorLog, ' ',imageNames(i).name, ':' ME.identifier, '.'];
+        continue;
+    end
+    
     
     currStruct = photosMap(currPhotoId);
     currStruct.Classification = currClassification;
@@ -72,3 +82,5 @@ for i = 1:length(photosMap)
         k{i}, photosMap(k{i})
     end
 end
+
+save('photosMap','photosMap','errorLog');
